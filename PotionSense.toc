@@ -1,0 +1,15 @@
+## Interface: 120001
+## Title: PotionSense
+## Notes: Keeps one potion macro updated based on your specialization and a saved potion per spec
+## Author: PatyYe
+## Version: 2.0.0
+
+## Category: Quality of Life
+## IconTexture: Interface\AddOns\PotionSense\Media\PotionSenseIcon.tga
+## SavedVariables: PotionSenseDB
+
+PotionSenseData.lua
+PotionSenseLogic.lua
+PotionSenseUI.lua
+PotionSenseEvents.lua
+PotionSense.lua
