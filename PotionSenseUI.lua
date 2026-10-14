@@ -12,6 +12,32 @@ local currentSelectedSpecID = nil
 local pendingRefresh = false
 local pendingMacroUpdate = false
 
+local function GetItemIconCompat(itemID)
+    if C_Item and C_Item.GetItemIconByID then
+        return C_Item.GetItemIconByID(itemID)
+    end
+    if GetItemIcon then
+        return GetItemIcon(itemID)
+    end
+    return nil
+end
+
+local function EnsureUIDropDownMenuAPI()
+    if UIDropDownMenu_Initialize and UIDropDownMenu_CreateInfo and UIDropDownMenu_AddButton and
+       UIDropDownMenu_SetWidth and UIDropDownMenu_SetSelectedValue then
+        return true
+    end
+
+    if C_AddOns and C_AddOns.LoadAddOn then
+        pcall(C_AddOns.LoadAddOn, "Blizzard_UIDropDownMenu")
+    elseif LoadAddOn then
+        pcall(LoadAddOn, "Blizzard_UIDropDownMenu")
+    end
+
+    return UIDropDownMenu_Initialize and UIDropDownMenu_CreateInfo and UIDropDownMenu_AddButton and
+           UIDropDownMenu_SetWidth and UIDropDownMenu_SetSelectedValue
+end
+
 -- Create a timer frame for deferred execution
 local timerFrame = CreateFrame("Frame")
 
@@ -147,7 +173,7 @@ local function RefreshPotionConfigDisplay()
                 info.text = potionTypeData.name
                 -- Try to get potion icon from first variant
                 if potionTypeData.variants and potionTypeData.variants[1] then
-                    local itemIcon = GetItemIcon(potionTypeData.variants[1].itemID)
+                    local itemIcon = GetItemIconCompat(potionTypeData.variants[1].itemID)
                     if itemIcon then
                         info.icon = itemIcon
                     end
@@ -199,6 +225,10 @@ local settingsCategory
 
 local function CreateSettingsPanel()
     local categoryName = "PotionSense"
+
+    if not EnsureUIDropDownMenuAPI() then
+        error("PotionSense: UIDropDownMenu API is unavailable.")
+    end
 
     local canvas = CreateFrame("Frame")
     canvas.name = categoryName

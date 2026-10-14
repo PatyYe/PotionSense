@@ -13,11 +13,40 @@ local function OnPlayerLogin()
     PotionSense.UpdateStatusText()
 end
 
+local function OpenSettingsPanel()
+    if not PotionSense.settingsCategory then
+        print("|cff66ccff" .. PotionSense.ADDON_NAME .. "|r: Settings panel not available yet. Try again in a moment.")
+        return
+    end
+
+    local category = PotionSense.settingsCategory
+    local categoryID = category.GetID and category:GetID() or nil
+
+    -- Support both modern and older signatures safely.
+    if Settings and Settings.OpenToCategory then
+        if categoryID then
+            local ok = pcall(Settings.OpenToCategory, categoryID)
+            if not ok then
+                pcall(Settings.OpenToCategory, categoryID, categoryID)
+            end
+        else
+            pcall(Settings.OpenToCategory, category)
+        end
+        return
+    end
+
+    if InterfaceOptionsFrame_OpenToCategory then
+        pcall(InterfaceOptionsFrame_OpenToCategory, category)
+    end
+end
+
 local frame = CreateFrame("Frame")
 
 frame:RegisterEvent("PLAYER_LOGIN")
 frame:RegisterEvent("BAG_UPDATE_DELAYED")
 frame:RegisterEvent("ACTIVE_TALENT_GROUP_CHANGED")
+frame:RegisterEvent("PLAYER_SPECIALIZATION_CHANGED")
+frame:RegisterEvent("PLAYER_ENTERING_WORLD")
 
 frame:SetScript("OnEvent", function(_, event)
     if event == "PLAYER_LOGIN" then
@@ -52,11 +81,7 @@ SlashCmdList.POTIONSENSE = function(msg)
         PotionSense.UpdatePotionMacro("manual slash command")
         PotionSense.UpdateStatusText()
     elseif msg == "" then
-        if PotionSense.settingsCategory then
-            Settings.OpenToCategory(PotionSense.settingsCategory:GetID(), PotionSense.settingsCategory:GetID())
-        else
-            print("|cff66ccff" .. PotionSense.ADDON_NAME .. "|r: Settings panel not available yet. Try again in a moment.")
-        end
+        OpenSettingsPanel()
     else
         print("|cff66ccff" .. PotionSense.ADDON_NAME .. "|r commands:")
         print("  /potionsense or /ps      - Open settings")

@@ -9,6 +9,16 @@ local function DebugPrint(message)
     print("|cff66ccff" .. PotionSense.ADDON_NAME .. "|r: " .. message)
 end
 
+local function GetItemIconCompat(itemID)
+    if C_Item and C_Item.GetItemIconByID then
+        return C_Item.GetItemIconByID(itemID)
+    end
+    if GetItemIcon then
+        return GetItemIcon(itemID)
+    end
+    return nil
+end
+
 local function GetMacroName()
     if PotionSenseDB and PotionSenseDB.macroName then
         return PotionSenseDB.macroName
@@ -284,7 +294,7 @@ local function UpdatePotionMacro(reason)
 
     local macroBody = BuildMacroBody(potionItemID)
     local itemName = GetPotionNameByID(potionItemID)
-    local _, wasUpdated = EnsureMacro(macroBody, GetItemIcon(potionItemID) or PotionSense.MACRO_ICON)
+    local _, wasUpdated = EnsureMacro(macroBody, GetItemIconCompat(potionItemID) or PotionSense.MACRO_ICON)
     
     -- Only show message if macro was actually updated and it's not just initialization
     if wasUpdated and reason ~= "PLAYER_LOGIN" then
